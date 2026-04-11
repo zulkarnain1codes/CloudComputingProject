@@ -1,6 +1,7 @@
 import boto3
 from logger import get_logger
 from botocore.exceptions import ClientError
+from boto3.dynamodb.conditions import Key, Attr
 log = get_logger()
 class dynamoDB:
     def __init__(self):
@@ -36,5 +37,24 @@ class dynamoDB:
                 batch.put_item(
                     Item=item
                 )
+    def build_filter_expression(self,filters):
+        filter_expr = None
 
+        for key, value in filters.items():
+            condition = Attr(key).eq(value)
+
+            if filter_expr is None:
+                filter_expr = condition
+            else:
+                filter_expr = filter_expr & condition  # AND condition
+
+        return filter_expr
+    def get_item(self,name,schema):
+        table=self.dynamodb.Table(name)
+        expression = self.build_filter_expression(schema)
+        response = table.scan(
+        FilterExpression=expression
+        )
+        items = response['Items']
+        return items
 
