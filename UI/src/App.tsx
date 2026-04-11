@@ -1,18 +1,16 @@
-import { Container, Typography, Box } from "@mui/material";
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import MainPage from "./pages/MainPage";
 
 function App() {
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ mt: 5 }}>
-        <Typography variant="h3">
-          Music Subscription App 🎵
-        </Typography>
-
-        <Typography variant="body1" sx={{ mt: 2 }}>
-          Frontend is working successfully.
-        </Typography>
-      </Box>
-    </Container>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/main" element={<MainPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
