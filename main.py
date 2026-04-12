@@ -1,6 +1,6 @@
-from utils.dynamodb import dynamoDB
-from utils.s3 import s3
-from logger import get_logger
+from server.utils.dynamodb import dynamoDB
+from server.utils.s3 import s3
+from server.logger import get_logger
 import json
 from boto3.dynamodb.conditions import Key, Attr
 import requests
@@ -8,9 +8,10 @@ log = get_logger()
 log.info("Application started")
 db = dynamoDB()
 bucket = s3()
-# music_schema =[{'AttributeName': 'artist','KeyType':'HASH'},{'AttributeName': 'title_year','KeyType':'RANGE'}]
-# music_attribute_definition = [{'AttributeName':'title_year','AttributeType':'S'},{'AttributeName':'artist','AttributeType':'S'}]
-# db.create_table("music",music_schema,music_attribute_definition)
+
+music_schema =[{'AttributeName': 'artist','KeyType':'HASH'},{'AttributeName': 'title_year','KeyType':'RANGE'}]
+music_attribute_definition = [{'AttributeName':'title_year','AttributeType':'S'},{'AttributeName':'artist','AttributeType':'S'}]
+db.create_table("music",music_schema,music_attribute_definition)
 
 
 # with open("resources/2026a2_songs.json", "r") as file:
@@ -44,10 +45,11 @@ get_schema = {
     'artist':'Elton John','year':'1972'
 }
 items =db.get_item("music",get_schema)
-keys = []
-for item in items:
-        artist = item["artist"].replace(" ", "_")
-        title = item["title_year"].replace(" ", "_")
-        key = f"music/{artist}_{title}.jpg"
-        keys.append(key)
-s3.get_from_bucket("s4139282picturebucket",keys)
+print(items)
+# keys = []
+# for item in items:
+#         artist = item["artist"].replace(" ", "_")
+#         title = item["title_year"].replace(" ", "_")
+#         key = f"music/{artist}_{title}.jpg"
+#         keys.append(key)
+# bucket.get_from_bucket("s4139282picturebucket",keys)

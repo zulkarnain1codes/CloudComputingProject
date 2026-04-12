@@ -1,5 +1,5 @@
 import boto3
-from logger import get_logger
+from server.logger import get_logger
 from botocore.exceptions import ClientError
 from io import BytesIO
 log = get_logger()
@@ -19,6 +19,7 @@ class s3:
                     'LocationConstraint': 'us-west-2'
                 }
             )
+            log.info("Bucket Created")
         except ClientError as e:
             error_code = e.response['Error']['Code']
 
@@ -28,7 +29,6 @@ class s3:
                 raise 
 
 
-        log.info("Bucket Created")
     def upload_to_bucket(self,name,key,item):
         log.info("upload_to_bucket function started")
         try:
@@ -48,15 +48,15 @@ class s3:
 
         for key in keys:
             try:
-                buffer = BytesIO()
-                self.s3.download_fileobj(name, key, buffer)
-                buffer.seek(0)
-
-                results.append(buffer.read())
-                log.info(f"Downloaded: {key}")
-
+                url = self.s3.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": name, "Key": key},
+                ExpiresIn=3600
+                )
+                results.append(url)
+                log.info(f"presigned url: {key}")
             except ClientError as e:
-                log.error(f"Failed to download {key}: {e}")
+                log.error(f"Failed to presign {key}: {e}")
                 results.append(None)  # or skip if you prefer
 
         return results
