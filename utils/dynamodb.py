@@ -5,7 +5,7 @@ from boto3.dynamodb.conditions import Key, Attr
 log = get_logger()
 class dynamoDB:
     def __init__(self):
-        self.dynamodb = boto3.resource('dynamodb')
+        self.dynamodb = boto3.resource('dynamodb', region_name='ap-southeast-2')
     def create_table(self,name,schema,attributedefinition):
         log.info("create_table function started")
         try:
