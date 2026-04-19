@@ -1,5 +1,5 @@
 import boto3
-from logger import get_logger
+from server.logger import get_logger
 from botocore.exceptions import ClientError
 from boto3.dynamodb.conditions import Key, Attr
 log = get_logger()
