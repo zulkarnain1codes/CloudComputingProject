@@ -4,8 +4,17 @@ import Navbar from "../components/mg_components/Navbar";
 import UserCard from "../components/mg_components/UserCard";
 import SubscriptionList from "../components/mg_components/SubscriptionList";
 import SearchPanel from "../components/mg_components/SearchPanel";
+import { useNavigate } from "react-router-dom";
+
 
 const MainPage: React.FC = () => {
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (!user) navigate("/login");
+  }, [navigate]);
+
   return (
     <Box
       sx={{
