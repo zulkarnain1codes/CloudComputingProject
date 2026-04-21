@@ -4,6 +4,10 @@ import { useNavigate } from "react-router-dom";
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  React.useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) navigate("/main");
+  }, []);
 
   return (
     <Box
@@ -29,6 +33,14 @@ const HomePage: React.FC = () => {
         onClick={() => navigate("/main")}
       >
         Go to Main Page
+      </Button>
+
+      <Button
+        variant="outlined"
+        size="large"
+        onClick={() => navigate("/login")}
+      >
+        Login
       </Button>
 
       <Button
