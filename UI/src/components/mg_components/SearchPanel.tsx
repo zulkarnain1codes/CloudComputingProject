@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Card, CardContent, Typography, TextField, Button, Box } from "@mui/material";
 import SongCard from "./SongCard";
-import { songs } from "../../data/songs";
+import type { Song } from "../../types/Song";
 
 const SearchPanel: React.FC = () => {
   const [title, setTitle] = useState("");
@@ -9,14 +9,73 @@ const SearchPanel: React.FC = () => {
   const [year, setYear] = useState("");
   const [album, setAlbum] = useState("");
 
-  const filteredSongs = songs.filter((song) => {
-    return (
-      song.title.toLowerCase().includes(title.toLowerCase()) &&
-      song.artist.toLowerCase().includes(artist.toLowerCase()) &&
-      song.year.toLowerCase().includes(year.toLowerCase()) &&
-      song.album.toLowerCase().includes(album.toLowerCase())
-    );
-  });
+  const [results, setResults] = useState<Song[]>([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [hasQueried, setHasQueried] = useState(false);
+
+  const handleQuery = async () => {
+    setError("");
+    setHasQueried(true);
+
+    const payload: Partial<Song> = {};
+
+    if (title.trim()) payload.title = title.trim();
+    if (artist.trim()) payload.artist = artist.trim();
+    if (year.trim()) payload.year = year.trim();
+    if (album.trim()) payload.album = album.trim();
+
+    if (Object.keys(payload).length === 0) {
+      setResults([]);
+      setError("At least one field must be completed.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await fetch("http://34.225.214.178/music", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch music data.");
+      }
+
+      const data = await response.json();
+
+      // API response format:
+      // {
+      //   jpg: [...],
+      //   details: [{ title, artist, album, year, img_url, ... }]
+      // }
+      const retrievedSongs: Song[] = data.details || [];
+
+      if (retrievedSongs.length === 0) {
+        setResults([]);
+        setError("No result is retrieved. Please query again.");
+      } else {
+        setResults(retrievedSongs);
+      }
+    } catch (err) {
+      console.error(err);
+      setResults([]);
+      setError("No result is retrieved. Please query again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubscribe = (song: Song) => {
+    console.log("Subscribe clicked for:", song);
+
+    // later here you can call your backend /subscribe API
+    // and also update the subscription area
+  };
 
   return (
     <Card
@@ -70,9 +129,11 @@ const SearchPanel: React.FC = () => {
 
           <Button
             variant="outlined"
+            onClick={handleQuery}
+            disabled={loading}
             sx={{ color: "white", borderColor: "gray", py: 1.5 }}
           >
-            Query
+            {loading ? "Loading..." : "Query"}
           </Button>
         </Box>
 
@@ -80,9 +141,24 @@ const SearchPanel: React.FC = () => {
           RESULTS
         </Typography>
 
-        {filteredSongs.map((song, index) => (
-          <SongCard key={index} song={song} buttonText="+ Subscribe" />
-        ))}
+        {error && (
+          <Typography sx={{ color: "#ff8a80", mb: 2 }}>
+            {error}
+          </Typography>
+        )}
+
+        {!error && hasQueried && results.length > 0 && (
+          <>
+            {results.map((song, index) => (
+              <SongCard
+                key={`${song.title}-${song.year}-${index}`}
+                song={song}
+                buttonText="Subscribe"
+                onButtonClick={handleSubscribe}
+              />
+            ))}
+          </>
+        )}
       </CardContent>
     </Card>
   );
