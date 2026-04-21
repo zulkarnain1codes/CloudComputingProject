@@ -5,9 +5,10 @@ import type { Song } from "../../types/Song";
 interface SongCardProps {
   song: Song;
   buttonText: string;
+  onButtonClick?: (song: Song) => void;
 }
 
-const SongCard: React.FC<SongCardProps> = ({ song, buttonText }) => {
+const SongCard: React.FC<SongCardProps> = ({ song, buttonText, onButtonClick }) => {
   return (
     <Card
       sx={{
@@ -36,6 +37,7 @@ const SongCard: React.FC<SongCardProps> = ({ song, buttonText }) => {
 
           <Button
             variant="outlined"
+            onClick={() => onButtonClick?.(song)}
             sx={{ color: "white", borderColor: "gray", minWidth: 120 }}
           >
             {buttonText}
