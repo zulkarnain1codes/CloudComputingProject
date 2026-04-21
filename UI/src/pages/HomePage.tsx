@@ -19,7 +19,7 @@ const HomePage: React.FC = () => {
         gap: 3,
       }}
     >
-      <Typography variant="h3" fontWeight="bold">
+      <Typography variant="h3" sx={{ fontWeight: 700 }}>
         Welcome to RAGA
       </Typography>
 
@@ -29,6 +29,14 @@ const HomePage: React.FC = () => {
         onClick={() => navigate("/main")}
       >
         Go to Main Page
+      </Button>
+
+      <Button
+        variant="outlined"
+        size="large"
+        onClick={() => navigate("/register")}
+      >
+        Register
       </Button>
     </Box>
   );
