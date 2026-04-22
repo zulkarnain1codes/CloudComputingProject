@@ -25,13 +25,20 @@ export const getSubscriptions = async (userEmail: string) => {
   return res.json();
 };
 
-export const removeSubscription = async (userEmail: string, title: string) => {
+export const removeSubscription = async (
+  userEmail: string,
+  title: string,
+  artist: string,
+  year: string
+) => {
   const res = await fetch(`${API_URL}/music/unsubscribe`, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       user_email: userEmail,
-      title: title,
+      title,
+      artist,
+      year,
     }),
   });
 

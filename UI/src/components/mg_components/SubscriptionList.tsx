@@ -26,7 +26,7 @@ const SubscriptionList: React.FC = () => {
 
     const user = JSON.parse(userData);
 
-    await removeSubscription(user.email, song.title);
+    await removeSubscription(user.email, song.title, song.artist, song.year);
 
     loadSubscriptions();
   };

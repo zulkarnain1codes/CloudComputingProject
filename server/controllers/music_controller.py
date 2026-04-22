@@ -30,7 +30,9 @@ def subscribe_music(data):
 
     existing = db.get_item("subscriptions", {
         "user_email": user_email,
-        "title": song["title"]
+        "title": song["title"],
+        "artist": song["artist"],
+        "year": song["year"]
     })
 
     if len(existing) > 0:
@@ -63,12 +65,17 @@ def get_subscriptions(data):
 def remove_subscription(data):
     user_email = data["user_email"]
     title = data["title"]
+    artist = data["artist"]
+    year = data["year"]
 
     table = db.dynamodb.Table("subscriptions")
 
     response = table.scan(
-        FilterExpression=Attr("user_email").eq(user_email) &
-                         Attr("title").eq(title)
+        FilterExpression=
+            Attr("user_email").eq(user_email) &
+            Attr("title").eq(title) &
+            Attr("artist").eq(artist) &
+            Attr("year").eq(year)
     )
 
     items = response.get("Items", [])
