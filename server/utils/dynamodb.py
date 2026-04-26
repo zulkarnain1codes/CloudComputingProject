@@ -1,7 +1,9 @@
+from urllib import response
+
 import boto3
 from server.logger import get_logger
 from botocore.exceptions import ClientError
-from boto3.dynamodb.conditions import Attr
+from boto3.dynamodb.conditions import Attr, Key
 
 log = get_logger()
 
@@ -64,3 +66,12 @@ class dynamoDB:
         response = table.scan(FilterExpression=expression)
         items = response['Items']
         return items
+    
+    def query_items(self, name, key_name, key_value):
+        table = self.dynamodb.Table(name)
+
+        response = table.query(
+            KeyConditionExpression=Key(key_name).eq(key_value)
+        )
+
+        return response.get("Items", [])
