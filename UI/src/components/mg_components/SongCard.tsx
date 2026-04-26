@@ -19,8 +19,8 @@ const SongCard: React.FC<SongCardProps> = ({ song, buttonText, onButtonClick }) 
       }}
     >
       <CardContent>
-        <Box display="flex" justifyContent="space-between" alignItems="center" gap={2}>
-          <Box display="flex" gap={2} alignItems="center">
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2 }}>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
             <Avatar
               src={song.img_url}
               alt={song.title}
@@ -28,7 +28,7 @@ const SongCard: React.FC<SongCardProps> = ({ song, buttonText, onButtonClick }) 
               sx={{ width: 56, height: 56 }}
             />
             <Box>
-              <Typography fontWeight="bold">{song.title}</Typography>
+              <Typography sx={{ fontWeight: "bold" }}>{song.title}</Typography>
               <Typography variant="body2" sx={{ opacity: 0.8 }}>
                 {song.artist} · {song.album} · {song.year}
               </Typography>
