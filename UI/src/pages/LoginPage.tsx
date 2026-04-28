@@ -4,6 +4,14 @@ import { useNavigate } from 'react-router-dom';
 const API_URL = import.meta.env.VITE_API_URL;
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
+
+    React.useEffect(() => { //Added fix for routing after login
+        const user = localStorage.getItem("user");
+        if (user) {
+            navigate("/main");
+        }
+    }, []);
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
