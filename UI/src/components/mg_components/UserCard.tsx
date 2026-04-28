@@ -21,12 +21,12 @@ const UserCard: React.FC = () => {
           USER
         </Typography>
 
-        <Box display="flex" alignItems="center" gap={2}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Avatar sx={{ bgcolor: "#1976d2" }}>
             {username.charAt(0).toUpperCase()}
           </Avatar>
           <Box>
-            <Typography fontWeight="bold">{username}</Typography>
+            <Typography sx={{ fontWeight: "bold" }}>{username}</Typography>
             <Typography variant="body2" sx={{ opacity: 0.8 }}>
               {email}
             </Typography>
