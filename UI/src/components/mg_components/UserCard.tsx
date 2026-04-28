@@ -2,6 +2,12 @@ import React from "react";
 import { Card, CardContent, Typography, Avatar, Box } from "@mui/material";
 
 const UserCard: React.FC = () => {
+  const userData = localStorage.getItem("user");
+  const user = userData ? JSON.parse(userData) : null;
+
+  const username = user?.username || "Guest";
+  const email = user?.email || "No email";
+
   return (
     <Card
       sx={{
@@ -15,12 +21,14 @@ const UserCard: React.FC = () => {
           USER
         </Typography>
 
-        <Box display="flex" alignItems="center" gap={2}>
-          <Avatar sx={{ bgcolor: "#1976d2" }}>JD</Avatar>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Avatar sx={{ bgcolor: "#1976d2" }}>
+            {username.charAt(0).toUpperCase()}
+          </Avatar>
           <Box>
-            <Typography fontWeight="bold">john_doe</Typography>
+            <Typography sx={{ fontWeight: "bold" }}>{username}</Typography>
             <Typography variant="body2" sx={{ opacity: 0.8 }}>
-              john@example.com
+              {email}
             </Typography>
           </Box>
         </Box>
