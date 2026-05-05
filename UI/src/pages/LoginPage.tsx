@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {Box, Button, TextField, Typography} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-const API_URL = import.meta.env.VITE_API_URL;
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
 
@@ -18,7 +17,7 @@ const LoginPage: React.FC = () => {
 
     const handleLogin = async () => {
         try {
-            const response = await fetch(`${API_URL}/login`, {
+            const response = await fetch("/api/login", {
                 method: "POST",
                 headers: {"Content-Type": "application/json",},
                 body: JSON.stringify({ email, password }),
