@@ -5,24 +5,65 @@ from server.utils.s3 import s3
 db = dynamoDB()
 bucket = s3()
 
+# def get_musiwswc(schema):
+#     if "artist" in schema:
+#         items = db.query_items("music", "artist", schema["artist"])
+#     else:
+#         items = db.get_item("music", schema)
+
+#     keys = []
+
+#     for item in items:
+#         artist = item["artist"].replace(" ", "_")
+#         title = item["title_year"].replace(" ", "_")
+#         key = f"music/{artist}_{title}.jpg"
+#         keys.append(key)
+
+#     results = bucket.get_from_bucket("s4139282picturebucket", keys)
+
+#     return {"jpg": results, "details": items}
+def post_filter(items, filter_attrs):
+    return [
+        item for item in items
+        if all(item.get(k) == v for k, v in filter_attrs.items())
+    ]
 def get_music(schema):
-    if "artist" in schema:
-        items = db.query_items("music", "artist", schema["artist"])
+    artist = schema.get("artist")
+    title = schema.get("title")
+    year = schema.get("year")
+
+    filter_attrs = {k: v for k, v in schema.items() 
+                    if k not in ["artist", "title", "year"]}
+
+    if artist and title and year:
+        items = db.get_item_by_key("music", artist, f"{title}#{year}")
+
+    elif artist and title:
+        items = db.query_items_lsi("music", "title_lsi", artist, "title", title)
+
+    elif artist and year:
+        
+        items = db.query_items_lsi("music", "year_lsi", artist, "year", year)
+
+    elif artist:
+        items = db.query_items("music", "artist", artist)
+
+    elif title and year:
+        items = db.query_items_gsi("music", "title_gsi", "title", title, "year", year)
+
+    elif title:
+        items = db.query_items_gsi("music", "title_gsi", "title", title)
+
+    elif year:
+        items = db.query_items_gsi("music", "year_gsi", "year", year)
+
     else:
-        items = db.get_item("music", schema)
+        items = db.scan_items("music", schema)
 
-    keys = []
+    if filter_attrs:
+        items = post_filter(items, filter_attrs)
 
-    for item in items:
-        artist = item["artist"].replace(" ", "_")
-        title = item["title_year"].replace(" ", "_")
-        key = f"music/{artist}_{title}.jpg"
-        keys.append(key)
-
-    results = bucket.get_from_bucket("s4139282picturebucket", keys)
-
-    return {"jpg": results, "details": items}
-
+    return items
 
 def subscribe_music(data):
     user_email = data["user_email"]
