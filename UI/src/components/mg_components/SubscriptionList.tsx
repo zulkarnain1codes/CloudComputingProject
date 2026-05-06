@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, Typography } from "@mui/material";
 import SongCard from "./SongCard";
-import { getSubscriptions, removeSubscription } from "../../services/musicApi";
+import { getSubscriptions, removeSubscription } from "../../api/api";
 
 interface SubscriptionListProps {
   refreshTrigger?: number;

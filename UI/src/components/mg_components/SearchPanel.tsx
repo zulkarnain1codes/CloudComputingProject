@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Card, CardContent, TextField, Button, Typography } from "@mui/material";
 import SongCard from "./SongCard";
-import { subscribeMusic } from "../../services/musicApi";
-
+import { subscribeMusic } from "../../api/api";
+import { getMusic } from "../../api/api";
 
 interface SearchPanelProps {
   onSubscribe?: () => void;
@@ -30,15 +30,7 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ onSubscribe }) => {
     if (album) schema.album = album;
 
     try {
-      const response = await fetch("/api/music", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(schema),
-      });
-
-      const data = await response.json();
+      const data = await getMusic(schema);
 
       if (!data.details || data.details.length === 0) {
         setNoResults(true);
@@ -47,12 +39,7 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ onSubscribe }) => {
       }
       setNoResults(false);
 
-      const combined = data.details.map((item: any, index: number) => ({
-        ...item,
-        image_url: data.jpg[index],
-      }));
-
-      setSongs(combined);
+      setSongs(data.details);
 
     } catch (err) {
       alert("Error fetching data");

@@ -1,3 +1,4 @@
+import { registerUser } from "../api/api";
 import React, { useState } from "react";
 import {
   Box,
@@ -26,22 +27,10 @@ const RegisterPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          user_name: username,
-          password,
-        }),
-      });
+      const data = await registerUser(email, username, password);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setMessage(data.detail || "Registration failed");
+      if (data.statusCode !== 200) {
+        setMessage(data.message || "Registration failed");
         setMessageType("error");
       } else {
         setMessage("Registration successful");

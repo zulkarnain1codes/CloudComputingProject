@@ -17,21 +17,31 @@ const LoginPage: React.FC = () => {
 
     const handleLogin = async () => {
         try {
-            const response = await fetch("/api/login", {
-                method: "POST",
-                headers: {"Content-Type": "application/json",},
-                body: JSON.stringify({ email, password }),
-            });
+            const response = await fetch(
+                `${import.meta.env.VITE_API_URL}/login_lambda`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password,
+                    }),
+                }
+            );
 
-            if (!response.ok) {
-                setError("email or password is invalid");
+            const data = await response.json();
+
+            if (data.statusCode !== 200) {
+                setError(data.message || "email or password is invalid");
                 return;
             }
 
-            const data = await response.json();
             localStorage.setItem("user", JSON.stringify(data.user));
             navigate("/main");
-        } catch {
+        } catch (error) {
+            console.error(error);
             setError("Error");
         }
     };
