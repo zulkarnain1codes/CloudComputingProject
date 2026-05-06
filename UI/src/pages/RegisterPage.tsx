@@ -48,7 +48,7 @@ const RegisterPage: React.FC = () => {
         setMessageType("success");
 
         setTimeout(() => {
-          navigate("/");
+          navigate("/login");
         }, 1000);
       }
     } catch (error) {
@@ -190,7 +190,7 @@ const RegisterPage: React.FC = () => {
           <Link
             component="button"
             variant="body2"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/login")}
             underline="hover"
           >
             Go to Login
