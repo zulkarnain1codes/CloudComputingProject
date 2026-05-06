@@ -5,6 +5,9 @@ from server.utils.s3 import s3
 db = dynamoDB()
 bucket = s3()
 
+
+BUCKET = "s4139282-raga-music-2026"
+
 # def get_musiwswc(schema):
 #     if "artist" in schema:
 #         items = db.query_items("music", "artist", schema["artist"])
@@ -63,17 +66,18 @@ def get_music(schema):
     if filter_attrs:
         items = post_filter(items, filter_attrs)
 
+    # Building S3 keys for each song image
     keys = []
-
     for item in items:
         artist = item["artist"].replace(" ", "_")
-        title = item["title_year"].replace(" ", "_")
-        key = f"music/{artist}_{title}.jpg"
+        title  = item["title"].replace(" ", "_")
+        key    = f"music/{artist}_{title}.jpg"
         keys.append(key)
 
-    results = bucket.get_from_bucket("s4139282picturebucket", keys)
+    # Generating presigned URLs from S3 for secure image access
+    urls = bucket.get_from_bucket(BUCKET, keys)
 
-    return {"jpg": results, "details": items}
+    return {"jpg": urls, "details": items}
 
 def subscribe_music(data):
     user_email = data["user_email"]
@@ -81,62 +85,39 @@ def subscribe_music(data):
 
     existing = db.get_item("subscriptions", {
         "user_email": user_email,
-        "title": song["title"],
-        "artist": song["artist"],
-        "year": song["year"]
+        "title": song["title"]
     })
 
-    if len(existing) > 0:
+    if existing:
         return {"message": "Already subscribed"}
 
     item = {
         "user_email": user_email,
-        "title": song["title"],
-        "artist": song["artist"],
-        "album": song["album"],
-        "year": song["year"],
-        "img_url": song["img_url"]
+        "title":      song["title"],
+        "artist":     song["artist"],
+        "album":      song.get("album", ""),
+        "year":       song.get("year", ""),
+        "img_url": song.get("img_url", "")
     }
 
     db.put_item("subscriptions", item)
-
     return {"message": "Subscribed successfully"}
 
 
 def get_subscriptions(data):
     user_email = data["user_email"]
-
-    items = db.get_item("subscriptions", {
-        "user_email": user_email
-    })
-
+    # Using Query on subscriptions table — user_email is partition key
+    items = db.query_items("subscriptions", "user_email", user_email)
     return {"subscriptions": items}
 
 
 def remove_subscription(data):
     user_email = data["user_email"]
-    title = data["title"]
-    artist = data["artist"]
-    year = data["year"]
+    title      = data["title"]
 
-    table = db.dynamodb.Table("subscriptions")
-
-    response = table.scan(
-        FilterExpression=
-            Attr("user_email").eq(user_email) &
-            Attr("title").eq(title) &
-            Attr("artist").eq(artist) &
-            Attr("year").eq(year)
-    )
-
-    items = response.get("Items", [])
-
-    for item in items:
-        table.delete_item(
-            Key={
-                "user_email": item["user_email"],
-                "title": item["title"]
-            }
-        )
-
+    # Deleting by primary key — user_email + title
+    db.delete_item("subscriptions", {
+        "user_email": user_email,
+        "title":      title
+    })
     return {"message": "Removed"}

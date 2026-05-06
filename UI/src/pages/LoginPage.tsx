@@ -24,7 +24,7 @@ const LoginPage: React.FC = () => {
             });
 
             if (!response.ok) {
-                setError("Invalid email or password");
+                setError("email or password is invalid");
                 return;
             }
 
