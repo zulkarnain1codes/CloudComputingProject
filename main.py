@@ -9,21 +9,73 @@ log.info("Application started")
 db = dynamoDB()
 bucket = s3()
 
-music_schema =[{'AttributeName': 'artist','KeyType':'HASH'},{'AttributeName': 'title_year','KeyType':'RANGE'}]
-music_attribute_definition = [{'AttributeName':'title_year','AttributeType':'S'},{'AttributeName':'artist','AttributeType':'S'}]
-db.create_table("music",music_schema,music_attribute_definition)
+# music_schema =[{'AttributeName': 'artist','KeyType':'HASH'},{'AttributeName': 'title_year','KeyType':'RANGE'}]
+# music_attribute_definition = [{'AttributeName':'title_year','AttributeType':'S'},{'AttributeName':'artist','AttributeType':'S'}]
+# db.create_table("music",music_schema,music_attribute_definition)
+music_schema = [
+    {'AttributeName': 'artist', 'KeyType': 'HASH'},
+    {'AttributeName': 'title_year', 'KeyType': 'RANGE'}
+]
 
+music_attribute_definition = [
+    {'AttributeName': 'artist', 'AttributeType': 'S'},
+    {'AttributeName': 'title_year', 'AttributeType': 'S'},
+    {'AttributeName': 'title', 'AttributeType': 'S'},
+    {'AttributeName': 'year', 'AttributeType': 'S'},
+]
 
-# with open("resources/2026a2_songs.json", "r") as file:
-#     data = json.load(file)
-#     for item in data['songs']:
-#         item["title_year"] = f"{item['title']}#{item['year']}"
-#     db.batch_load("music",data['songs']) #Exception Handling Might be necessary for this check later
-#     log.info("Batch load completed")
-# table = db.dynamodb.Table("music")
-# response = table.scan(
-#     ProjectionExpression="artist,title_year,img_url"
-# )
+music_lsi = [
+    {
+        'IndexName': 'title_lsi',
+        'KeySchema': [
+            {'AttributeName': 'artist', 'KeyType': 'HASH'},
+            {'AttributeName': 'title', 'KeyType': 'RANGE'}
+        ],
+        'Projection': {'ProjectionType': 'ALL'}
+    },
+    {
+        'IndexName': 'year_lsi',
+        'KeySchema': [
+            {'AttributeName': 'artist', 'KeyType': 'HASH'},
+            {'AttributeName': 'year', 'KeyType': 'RANGE'}
+        ],
+        'Projection': {'ProjectionType': 'ALL'}
+    }
+]
+
+music_gsi = [
+    {
+        'IndexName': 'title_gsi',
+        'KeySchema': [
+            {'AttributeName': 'title', 'KeyType': 'HASH'},
+            {'AttributeName': 'year', 'KeyType': 'RANGE'}
+        ],
+        'Projection': {'ProjectionType': 'ALL'},
+        'ProvisionedThroughput': {'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5}
+    },
+    {
+        'IndexName': 'year_gsi',
+        'KeySchema': [
+            {'AttributeName': 'year', 'KeyType': 'HASH'},
+            {'AttributeName': 'title', 'KeyType': 'RANGE'}
+        ],
+        'Projection': {'ProjectionType': 'ALL'},
+        'ProvisionedThroughput': {'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5}
+    }
+]
+
+db.create_table("music", music_schema, music_attribute_definition, music_lsi, music_gsi)
+
+with open("resources/2026a2_songs.json", "r") as file:
+    data = json.load(file)
+    for item in data['songs']:
+        item["title_year"] = f"{item['title']}#{item['year']}"
+    db.batch_load("music",data['songs']) #Exception Handling Might be necessary for this check later
+    log.info("Batch load completed")
+table = db.dynamodb.Table("music")
+response = table.scan(
+    ProjectionExpression="artist,title_year,img_url"
+)
 
 # items = response["Items"]
 # print(items)
@@ -41,11 +93,11 @@ db.create_table("music",music_schema,music_attribute_definition)
 
 #     except Exception as e:
 #         print(f"Failed for {img_url}: {e}")
-get_schema = {
-    'artist':'Elton John','year':'1972'
-}
-items =db.get_item("music",get_schema)
-print(items)
+# get_schema = {
+#     'artist':'Elton John','year':'1972'
+# }
+# items =db.get_item("music",get_schema)
+# print(items)
 # keys = []
 # for item in items:
 #         artist = item["artist"].replace(" ", "_")
