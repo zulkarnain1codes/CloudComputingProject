@@ -6,7 +6,7 @@ db = dynamoDB()
 bucket = s3()
 
 
-BUCKET = "s4139282-raga-music-2026"
+BUCKET = "s4139282picturebucket"
 
 # def get_musiwswc(schema):
 #     if "artist" in schema:
@@ -82,22 +82,21 @@ def get_music(schema):
 def subscribe_music(data):
     user_email = data["user_email"]
     song = data["song"]
-
-    existing = db.get_item("subscriptions", {
-        "user_email": user_email,
-        "title": song["title"]
-    })
+    items =db.query_items("subscriptions", "user_email", user_email)
+    artist_title_year = f"{song['artist']}#{song['title']}#{song['year']}"
+    existing = any(item.get("artist_title_year") == artist_title_year for item in items)
 
     if existing:
         return {"message": "Already subscribed"}
-
+    
     item = {
         "user_email": user_email,
         "title":      song["title"],
         "artist":     song["artist"],
         "album":      song.get("album", ""),
         "year":       song.get("year", ""),
-        "img_url": song.get("img_url", "")
+        "img_url": song.get("img_url", ""),
+        "artist_title_year" : artist_title_year
     }
 
     db.put_item("subscriptions", item)
@@ -113,11 +112,11 @@ def get_subscriptions(data):
 
 def remove_subscription(data):
     user_email = data["user_email"]
-    title      = data["title"]
+    artist_title_year = f"{data['artist']}#{data['title']}#{data['year']}"
 
     # Deleting by primary key — user_email + title
     db.delete_item("subscriptions", {
         "user_email": user_email,
-        "title":      title
+        "artist_title_year": artist_title_year
     })
     return {"message": "Removed"}

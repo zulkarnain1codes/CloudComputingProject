@@ -85,7 +85,7 @@ class dynamoDB:
             filter_expr = condition if filter_expr is None else filter_expr & condition
         return filter_expr
 
-    def get_item(self, name, schema):
+    def scan_items(self, name, schema):
         # Using Scan with filter — for multi-field queries without index
         table = self.dynamodb.Table(name)
         expression = self.build_filter_expression(schema)
