@@ -3,7 +3,6 @@ import { Card, CardContent, TextField, Button, Typography } from "@mui/material"
 import SongCard from "./SongCard";
 import { subscribeMusic } from "../../services/musicApi";
 
-const API_URL = import.meta.env.VITE_API_URL;
 
 const SearchPanel: React.FC = () => {
   const [title, setTitle] = useState("");
@@ -26,7 +25,7 @@ const SearchPanel: React.FC = () => {
     if (album) schema.album = album;
 
     try {
-      const response = await fetch(`${API_URL}/music`, {
+      const response = await fetch("/api/music", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

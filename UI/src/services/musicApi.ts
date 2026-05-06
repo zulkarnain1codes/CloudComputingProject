@@ -1,7 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL;
+
 
 export const subscribeMusic = async (userEmail: string, song: any) => {
-  const res = await fetch(`${API_URL}/music/subscribe`, {
+  const res = await fetch("/api/music/subscribe", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -14,7 +14,7 @@ export const subscribeMusic = async (userEmail: string, song: any) => {
 };
 
 export const getSubscriptions = async (userEmail: string) => {
-  const res = await fetch(`${API_URL}/music/subscriptions`, {
+  const res = await fetch("/api/music/subscriptions", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -31,7 +31,7 @@ export const removeSubscription = async (
   artist: string,
   year: string
 ) => {
-  const res = await fetch(`${API_URL}/music/unsubscribe`, {
+  const res = await fetch("/api/music/unsubscribe", {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

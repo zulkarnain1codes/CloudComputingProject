@@ -11,3 +11,7 @@ utils/
 .env
 
 logs/
+
+# MacOS bs
+.DS_Store
+**/.DS_Store

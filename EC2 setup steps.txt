@@ -1,0 +1,80 @@
+sudo apt update && sudo apt upgrade -y
+sudo apt install python3-pip python3-venv nginx -y
+
+mkdir app && cd app
+python3 -m venv venv
+source venv/bin/activate
+
+pip install fastapi uvicorn gunicorn
+
+sudo nano /etc/systemd/system/fastapi.service
+
+[Unit]
+Description=FastAPI app
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/app
+Environment="PATH=/home/ubuntu/app/venv/bin"
+ExecStart=/home/ubuntu/app/venv/bin/gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
+
+[Install]
+WantedBy=multi-user.target
+
+sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
+sudo systemctl start fastapi
+sudo systemctl enable fastapi
+
+sudo nano /etc/nginx/sites-available/fastapi
+
+server {
+    listen 80;
+    server_name your_domain_or_ip;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+sudo ln -s /etc/nginx/sites-available/fastapi /etc/nginx/sites-enabled
+sudo nginx -t
+sudo systemctl restart nginx
+
+
+npm run build
+sudo nano /etc/nginx/sites-available/fastapi
+
+server {
+    listen 80;
+    server_name 34.225.214.178;
+
+    # React frontend
+    location / {
+    root /var/www/frontend;
+    index index.html;
+    try_files $uri /index.html;
+	}
+
+    # FastAPI backend
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+sudo nginx -t
+sudo systemctl restart nginx
+sudo rm -rf /var/www/frontend
+sudo mkdir -p /var/www/frontend
+
+
+sudo cp -r /home/ubuntu/dist/* /var/www/frontend/
+
+sudo nginx -t
+sudo systemctl restart nginx

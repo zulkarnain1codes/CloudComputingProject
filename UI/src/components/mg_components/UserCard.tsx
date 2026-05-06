@@ -5,7 +5,7 @@ const UserCard: React.FC = () => {
   const userData = localStorage.getItem("user");
   const user = userData ? JSON.parse(userData) : null;
 
-  const username = user?.username || "Guest";
+  const username = user?.user_name || "Guest";
   const email = user?.email || "No email";
 
   return (

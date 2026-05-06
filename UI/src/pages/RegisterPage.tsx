@@ -9,7 +9,6 @@ import {
   Link,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-const API_URL =import.meta.env.VITE_API_URL;
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
 
@@ -27,7 +26,7 @@ const RegisterPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/register`, {
+      const response = await fetch("/api/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

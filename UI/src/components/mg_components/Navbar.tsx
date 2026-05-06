@@ -3,6 +3,9 @@ import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
   
 const Navbar: React.FC = () => {
+  const userData = localStorage.getItem("user");
+  const user = userData ? JSON.parse(userData) : null;
+  const username = user?.user_name || "Guest";
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -18,7 +21,7 @@ const Navbar: React.FC = () => {
         </Typography>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Typography variant="body1">Welcome, john_doe</Typography>
+          <Typography variant="body1">Welcome, {username}</Typography>
           <Button
             variant="outlined"
             sx={{ color: "#fff", borderColor: "#fff" }}
