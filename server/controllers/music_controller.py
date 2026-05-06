@@ -5,25 +5,66 @@ from server.utils.s3 import s3
 db = dynamoDB()
 bucket = s3()
 
+
 BUCKET = "s4139282-raga-music-2026"
 
+# def get_musiwswc(schema):
+#     if "artist" in schema:
+#         items = db.query_items("music", "artist", schema["artist"])
+#     else:
+#         items = db.get_item("music", schema)
+
+#     keys = []
+
+#     for item in items:
+#         artist = item["artist"].replace(" ", "_")
+#         title = item["title_year"].replace(" ", "_")
+#         key = f"music/{artist}_{title}.jpg"
+#         keys.append(key)
+
+#     results = bucket.get_from_bucket("s4139282picturebucket", keys)
+
+#     return {"jpg": results, "details": items}
+def post_filter(items, filter_attrs):
+    return [
+        item for item in items
+        if all(item.get(k) == v for k, v in filter_attrs.items())
+    ]
 def get_music(schema):
-    # Using Query when only artist provided — uses partition key directly
-    if "artist" in schema and len(schema) == 1:
-        items = db.query_items("music", "artist", schema["artist"])
+    artist = schema.get("artist")
+    title = schema.get("title")
+    year = schema.get("year")
 
-    # Using LSI when artist + year provided — efficient index lookup
-    elif "artist" in schema and "year" in schema and len(schema) == 2:
-        items = db.query_lsi("music", "artist-year-index",
-                             schema["artist"], schema["year"])
+    filter_attrs = {k: v for k, v in schema.items() 
+                    if k not in ["artist", "title", "year"]}
 
-    # Using GSI when only year provided — queries year-index
-    elif "year" in schema and len(schema) == 1:
-        items = db.query_gsi("music", "year-index", schema["year"])
+    if artist and title and year:
+        items = db.get_item_by_key("music", artist, f"{title}#{year}")
 
-    # Using Scan for all other combinations (title, album, mixed)
+    elif artist and title:
+        items = db.query_items_lsi("music", "title_lsi", artist, "title", title)
+
+    elif artist and year:
+        
+        items = db.query_items_lsi("music", "year_lsi", artist, "year", year)
+
+    elif artist:
+        items = db.query_items("music", "artist", artist)
+
+    elif title and year:
+        items = db.query_items_gsi("music", "title_gsi", "title", title, "year", year)
+
+    elif title:
+        items = db.query_items_gsi("music", "title_gsi", "title", title)
+
+    elif year:
+        items = db.query_items_gsi("music", "year_gsi", "year", year)
+
     else:
-        items = db.get_item("music", schema)
+        items = db.scan_items("music", schema)
+
+    if filter_attrs:
+        items = post_filter(items, filter_attrs)
 
     # Building S3 keys for each song image
     keys = []
@@ -37,7 +78,6 @@ def get_music(schema):
     urls = bucket.get_from_bucket(BUCKET, keys)
 
     return {"jpg": urls, "details": items}
-
 
 def subscribe_music(data):
     user_email = data["user_email"]

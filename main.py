@@ -8,37 +8,7 @@ log = get_logger()
 db = dynamoDB()
 bucket = s3()
 
-# ── MUSIC TABLE ───────────────────────────────────────────────────────────────
-# Partition key: artist | Sort key: title
-# LSI: artist + year  → query all songs by an artist in a specific year
-# GSI: year + title   → query songs by year without knowing the artist
-music_schema = [
-    {'AttributeName': 'artist', 'KeyType': 'HASH'},
-    {'AttributeName': 'title',  'KeyType': 'RANGE'}
-]
-music_attrs = [
-    {'AttributeName': 'artist', 'AttributeType': 'S'},
-    {'AttributeName': 'title',  'AttributeType': 'S'},
-    {'AttributeName': 'year',   'AttributeType': 'S'},
-]
-music_lsi = [{
-    'IndexName': 'artist-year-index',
-    'KeySchema': [
-        {'AttributeName': 'artist', 'KeyType': 'HASH'},
-        {'AttributeName': 'year',   'KeyType': 'RANGE'}
-    ],
-    'Projection': {'ProjectionType': 'ALL'}
-}]
-music_gsi = [{
-    'IndexName': 'year-index',
-    'KeySchema': [
-        {'AttributeName': 'year',  'KeyType': 'HASH'},
-        {'AttributeName': 'title', 'KeyType': 'RANGE'}
-    ],
-    'Projection': {'ProjectionType': 'ALL'},
-    'ProvisionedThroughput': {'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5}
-}]
-db.create_table_with_indexes("music", music_schema, music_attrs, music_lsi, music_gsi)
+
 
 # ── LOGIN TABLE ───────────────────────────────────────────────────────────────
 # Partition key: email — each user has a unique email
@@ -104,3 +74,101 @@ for item in songs:
         log.error(f"Failed {img_url}: {e}")
 
 log.info("Done")
+
+# music_schema =[{'AttributeName': 'artist','KeyType':'HASH'},{'AttributeName': 'title_year','KeyType':'RANGE'}]
+# music_attribute_definition = [{'AttributeName':'title_year','AttributeType':'S'},{'AttributeName':'artist','AttributeType':'S'}]
+# db.create_table("music",music_schema,music_attribute_definition)
+music_schema = [
+    {'AttributeName': 'artist', 'KeyType': 'HASH'},
+    {'AttributeName': 'title_year', 'KeyType': 'RANGE'}
+]
+
+music_attribute_definition = [
+    {'AttributeName': 'artist', 'AttributeType': 'S'},
+    {'AttributeName': 'title_year', 'AttributeType': 'S'},
+    {'AttributeName': 'title', 'AttributeType': 'S'},
+    {'AttributeName': 'year', 'AttributeType': 'S'},
+]
+
+music_lsi = [
+    {
+        'IndexName': 'title_lsi',
+        'KeySchema': [
+            {'AttributeName': 'artist', 'KeyType': 'HASH'},
+            {'AttributeName': 'title', 'KeyType': 'RANGE'}
+        ],
+        'Projection': {'ProjectionType': 'ALL'}
+    },
+    {
+        'IndexName': 'year_lsi',
+        'KeySchema': [
+            {'AttributeName': 'artist', 'KeyType': 'HASH'},
+            {'AttributeName': 'year', 'KeyType': 'RANGE'}
+        ],
+        'Projection': {'ProjectionType': 'ALL'}
+    }
+]
+
+music_gsi = [
+    {
+        'IndexName': 'title_gsi',
+        'KeySchema': [
+            {'AttributeName': 'title', 'KeyType': 'HASH'},
+            {'AttributeName': 'year', 'KeyType': 'RANGE'}
+        ],
+        'Projection': {'ProjectionType': 'ALL'},
+        'ProvisionedThroughput': {'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5}
+    },
+    {
+        'IndexName': 'year_gsi',
+        'KeySchema': [
+            {'AttributeName': 'year', 'KeyType': 'HASH'},
+            {'AttributeName': 'title', 'KeyType': 'RANGE'}
+        ],
+        'Projection': {'ProjectionType': 'ALL'},
+        'ProvisionedThroughput': {'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5}
+    }
+]
+
+db.create_table("music", music_schema, music_attribute_definition, music_lsi, music_gsi)
+
+with open("resources/2026a2_songs.json", "r") as file:
+    data = json.load(file)
+    for item in data['songs']:
+        item["title_year"] = f"{item['title']}#{item['year']}"
+    db.batch_load("music",data['songs']) #Exception Handling Might be necessary for this check later
+    log.info("Batch load completed")
+table = db.dynamodb.Table("music")
+response = table.scan(
+    ProjectionExpression="artist,title_year,img_url"
+)
+
+# items = response["Items"]
+# print(items)
+# bucket.create_bucket(name="s4139282picturebucket")
+# for item in items:
+#     img_url = item["img_url"]
+
+#     artist = item["artist"].replace(" ", "_")
+#     title = item["title_year"].replace(" ", "_")
+
+#     try:
+#         img_data = requests.get(img_url).content
+#         key = f"music/{artist}_{title}.jpg"
+#         bucket.upload_to_bucket("s4139282picturebucket",key,img_data)
+
+#     except Exception as e:
+#         print(f"Failed for {img_url}: {e}")
+# get_schema = {
+#     'artist':'Elton John','year':'1972'
+# }
+# items =db.get_item("music",get_schema)
+# print(items)
+# keys = []
+# for item in items:
+#         artist = item["artist"].replace(" ", "_")
+#         title = item["title_year"].replace(" ", "_")
+#         key = f"music/{artist}_{title}.jpg"
+#         keys.append(key)
+# bucket.get_from_bucket("s4139282picturebucket",keys)
+
