@@ -5,12 +5,17 @@ import { subscribeMusic } from "../../services/musicApi";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const SearchPanel: React.FC = () => {
+interface SearchPanelProps {
+  onSubscribe?: () => void;
+}
+
+const SearchPanel: React.FC<SearchPanelProps> = ({ onSubscribe }) => {
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
   const [year, setYear] = useState("");
   const [album, setAlbum] = useState("");
   const [songs, setSongs] = useState<any[]>([]);
+  const [noResults, setNoResults] = useState(false);
 
   const handleSearch = async () => {
     // Assignment requirement: at least one field must be filled
@@ -26,7 +31,7 @@ const SearchPanel: React.FC = () => {
     if (album) schema.album = album;
 
     try {
-      const response = await fetch(`${API_URL}/music`, {
+      const response = await fetch(`${API_URL}/music/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -37,14 +42,15 @@ const SearchPanel: React.FC = () => {
       const data = await response.json();
 
       if (!data.details || data.details.length === 0) {
-        alert("No result is retrieved. Please query again");
+        setNoResults(true);
         setSongs([]);
         return;
       }
+      setNoResults(false);
 
       const combined = data.details.map((item: any, index: number) => ({
         ...item,
-        img_url: data.jpg[index],
+        image_url: data.jpg[index],
       }));
 
       setSongs(combined);
@@ -61,8 +67,7 @@ const SearchPanel: React.FC = () => {
     const user = JSON.parse(userData);
 
     await subscribeMusic(user.email, song);
-
-    alert("Subscribed successfully");
+    onSubscribe?.();  // triggers subscription list to refresh
   };
 
   return (
@@ -107,6 +112,12 @@ const SearchPanel: React.FC = () => {
         <Button variant="contained" fullWidth onClick={handleSearch}>
           Query
         </Button>
+
+        {noResults && (
+          <Typography sx={{ mt: 2, color: "#ff6b6b" }}>
+            No result is retrieved. Please query again
+          </Typography>
+        )}
 
         {songs.map((song, index) => (
           <SongCard

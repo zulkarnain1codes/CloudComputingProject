@@ -3,7 +3,11 @@ import { Card, CardContent, Typography } from "@mui/material";
 import SongCard from "./SongCard";
 import { getSubscriptions, removeSubscription } from "../../services/musicApi";
 
-const SubscriptionList: React.FC = () => {
+interface SubscriptionListProps {
+  refreshTrigger?: number;
+}
+
+const SubscriptionList: React.FC<SubscriptionListProps> = ({ refreshTrigger }) => {
   const [songs, setSongs] = useState<any[]>([]);
 
   const loadSubscriptions = async () => {
@@ -18,7 +22,7 @@ const SubscriptionList: React.FC = () => {
 
   useEffect(() => {
     loadSubscriptions();
-  }, []);
+  }, [refreshTrigger]);  // reloads whenever SearchPanel subscribes
 
   const handleRemove = async (song: any) => {
     const userData = localStorage.getItem("user");
