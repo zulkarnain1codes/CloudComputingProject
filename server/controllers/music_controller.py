@@ -8,23 +8,6 @@ bucket = s3()
 
 BUCKET = "s4139282picturebucket"
 
-# def get_musiwswc(schema):
-#     if "artist" in schema:
-#         items = db.query_items("music", "artist", schema["artist"])
-#     else:
-#         items = db.get_item("music", schema)
-
-#     keys = []
-
-#     for item in items:
-#         artist = item["artist"].replace(" ", "_")
-#         title = item["title_year"].replace(" ", "_")
-#         key = f"music/{artist}_{title}.jpg"
-#         keys.append(key)
-
-#     results = bucket.get_from_bucket("s4139282picturebucket", keys)
-
-#     return {"jpg": results, "details": items}
 def post_filter(items, filter_attrs):
     return [
         item for item in items

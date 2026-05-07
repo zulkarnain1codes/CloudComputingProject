@@ -22,3 +22,6 @@ app.include_router(login_router)
 @app.get("/")
 def home():
     return {"message": "FastAPI server is running!"}
+@app.get("/health")
+def health():
+    return {"status": "ok"}

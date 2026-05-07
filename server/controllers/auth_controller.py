@@ -8,7 +8,7 @@ def register_user(data):
     user_name = data.user_name.strip()
     password = data.password.strip()
 
-    existing_users = db.get_item("login", {"email": email})
+    existing_users = db.query_items("login", "email",email)
 
     if existing_users:
         raise HTTPException(status_code=400, detail="The email already exists")

@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import {Box, Button, TextField, Typography} from '@mui/material';
+import { Box, Button, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { getApiUrl } from '../config/apiConfig';
+
+
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
 
-    React.useEffect(() => { //Added fix for routing after login
+    React.useEffect(() => {
         const user = localStorage.getItem("user");
         if (user) {
             navigate("/main");
@@ -17,9 +20,9 @@ const LoginPage: React.FC = () => {
 
     const handleLogin = async () => {
         try {
-            const response = await fetch("/api/login", {
+            const response = await fetch(`${getApiUrl()}/login`, {
                 method: "POST",
-                headers: {"Content-Type": "application/json",},
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),
             });
 
@@ -54,7 +57,6 @@ const LoginPage: React.FC = () => {
                 Login
             </Typography>
 
-
             <TextField
                 label = "Email"
                 variant = "outlined"
@@ -83,7 +85,7 @@ const LoginPage: React.FC = () => {
                 Register
             </Button>
         </Box>
-        );
-    };
+    );
+};
 
 export default LoginPage;

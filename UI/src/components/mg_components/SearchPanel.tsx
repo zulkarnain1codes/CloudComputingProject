@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Card, CardContent, TextField, Button, Typography } from "@mui/material";
 import SongCard from "./SongCard";
 import { subscribeMusic } from "../../services/musicApi";
-
+import { getApiUrl } from '../../config/apiConfig';
 
 interface SearchPanelProps {
   onSubscribe?: () => void;
@@ -30,7 +30,7 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ onSubscribe }) => {
     if (album) schema.album = album;
 
     try {
-      const response = await fetch("/api/music", {
+      const response = await fetch(`${getApiUrl()}/music`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
