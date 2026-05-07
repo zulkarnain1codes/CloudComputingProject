@@ -6,7 +6,7 @@ import BackendSwitcher from "../components/BackendSwitcher";
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   React.useEffect(() => {
-    const user = localStorage.getItem("user");
+    const user = sessionStorage.getItem("user");
     if (user) navigate("/main");
   }, []);
 

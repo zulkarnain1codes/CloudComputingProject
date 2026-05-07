@@ -11,7 +11,7 @@ const SubscriptionList: React.FC<SubscriptionListProps> = ({ refreshTrigger }) =
   const [songs, setSongs] = useState<any[]>([]);
 
   const loadSubscriptions = async () => {
-    const userData = localStorage.getItem("user");
+    const userData = sessionStorage.getItem("user");
     if (!userData) return;
 
     const user = JSON.parse(userData);
@@ -25,7 +25,7 @@ const SubscriptionList: React.FC<SubscriptionListProps> = ({ refreshTrigger }) =
   }, [refreshTrigger]);  // reloads whenever SearchPanel subscribes
 
   const handleRemove = async (song: any) => {
-    const userData = localStorage.getItem("user");
+    const userData = sessionStorage.getItem("user");
     if (!userData) return;
 
     const user = JSON.parse(userData);

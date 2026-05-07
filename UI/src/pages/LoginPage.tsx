@@ -8,7 +8,7 @@ const LoginPage: React.FC = () => {
     const navigate = useNavigate();
 
     React.useEffect(() => {
-        const user = localStorage.getItem("user");
+        const user = sessionStorage.getItem("user");
         if (user) {
             navigate("/main");
         }
@@ -32,7 +32,7 @@ const LoginPage: React.FC = () => {
             }
 
             const data = await response.json();
-            localStorage.setItem("user", JSON.stringify(data.user));
+            sessionStorage.setItem("user", JSON.stringify(data.user));
             navigate("/main");
         } catch {
             setError("Error");

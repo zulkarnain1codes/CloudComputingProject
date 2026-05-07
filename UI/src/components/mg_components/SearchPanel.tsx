@@ -60,7 +60,7 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ onSubscribe }) => {
   };
 
   const handleSubscribe = async (song: any) => {
-    const userData = localStorage.getItem("user");
+    const userData = sessionStorage.getItem("user");
     if (!userData) return;
 
     const user = JSON.parse(userData);
