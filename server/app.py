@@ -8,15 +8,11 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://music-app-frontend-a231.s3-website-us-east-1.amazonaws.com",
-        "http://localhost:5173",
-        "http://localhost:3000",
-    ],
-    allow_credentials=True,
+    allow_origins=["http://music-app-frontend-a231.s3-website-us-east-1.amazonaws.com"],
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_credentials=True,
 )
-
 app.include_router(music_router)
 app.include_router(auth_router)
 app.include_router(login_router)
