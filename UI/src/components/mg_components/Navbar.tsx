@@ -17,7 +17,7 @@ const Navbar: React.FC = () => {
     <AppBar position="static" sx={{ backgroundColor: "#1976d2" }}>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-          Music Subscription App
+          RAGA
         </Typography>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
