@@ -9,6 +9,7 @@ import {
   Link,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { getApiUrl } from '../config/apiConfig';
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
 
@@ -26,7 +27,7 @@ const RegisterPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/register", {
+      const response = await fetch(`${getApiUrl()}/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -48,7 +49,7 @@ const RegisterPage: React.FC = () => {
         setMessageType("success");
 
         setTimeout(() => {
-          navigate("/");
+          navigate("/login");
         }, 1000);
       }
     } catch (error) {
@@ -190,7 +191,7 @@ const RegisterPage: React.FC = () => {
           <Link
             component="button"
             variant="body2"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/login")}
             underline="hover"
           >
             Go to Login

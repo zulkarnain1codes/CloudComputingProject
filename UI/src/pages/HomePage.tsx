@@ -1,11 +1,12 @@
 import React from "react";
 import { Box, Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import BackendSwitcher from "../components/BackendSwitcher";
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   React.useEffect(() => {
-    const user = localStorage.getItem("user");
+    const user = sessionStorage.getItem("user");
     if (user) navigate("/main");
   }, []);
 
@@ -23,6 +24,11 @@ const HomePage: React.FC = () => {
         gap: 3,
       }}
     >
+      {/* Backend switcher pinned to top-right corner */}
+      <Box sx={{ position: "fixed", top: 16, right: 16, zIndex: 1000 }}>
+        <BackendSwitcher />
+      </Box>
+
       <Typography variant="h3" sx={{ fontWeight: 700 }}>
         Welcome to RAGA
       </Typography>

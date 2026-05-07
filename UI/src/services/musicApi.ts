@@ -1,7 +1,7 @@
-
+import { getApiUrl } from '../config/apiConfig';
 
 export const subscribeMusic = async (userEmail: string, song: any) => {
-  const res = await fetch("/api/music/subscribe", {
+  const res = await fetch(`${getApiUrl()}/music/subscribe`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -14,7 +14,7 @@ export const subscribeMusic = async (userEmail: string, song: any) => {
 };
 
 export const getSubscriptions = async (userEmail: string) => {
-  const res = await fetch("/api/music/subscriptions", {
+  const res = await fetch(`${getApiUrl()}/music/subscriptions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -31,7 +31,7 @@ export const removeSubscription = async (
   artist: string,
   year: string
 ) => {
-  const res = await fetch("/api/music/unsubscribe", {
+  const res = await fetch(`${getApiUrl()}/music/unsubscribe`, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

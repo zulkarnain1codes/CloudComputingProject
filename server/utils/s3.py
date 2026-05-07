@@ -7,7 +7,7 @@ log = get_logger()
 
 class s3:
     def __init__(self):
-        self.s3 = boto3.client('s3')
+        self.s3 = boto3.client('s3', region_name='us-west-2')
 
     def create_bucket(self,name):
         log.info("create_bucket function started")
@@ -25,6 +25,9 @@ class s3:
 
             if error_code == 'BucketAlreadyOwnedByYou':
                 log.info(f"Bucket '{name}' already exists and is owned by you. Skipping creation.")
+            elif error_code == 'BucketAlreadyExists':
+                log.info(f"Bucket '{name}' name taken globally — rename it.")
+                raise
             else:
                 raise 
 

@@ -1,5 +1,3 @@
-from urllib import response
-
 import boto3
 from server.logger import get_logger
 from botocore.exceptions import ClientError
@@ -42,7 +40,6 @@ class dynamoDB:
             table = self.dynamodb.Table(name)
             table.load()
             log.info("Table already exists")
-
         except ClientError as e:
             if e.response["Error"]["Code"] == "ResourceNotFoundException":
                 log.info("Table does not exist, creating...")
@@ -68,6 +65,7 @@ class dynamoDB:
             else:
                 log.error(e)
                 raise
+
     def batch_load(self, name, collection):
         log.info("batch_load function started")
         table = self.dynamodb.Table(name)
@@ -82,18 +80,13 @@ class dynamoDB:
 
     def build_filter_expression(self, filters):
         filter_expr = None
-
         for key, value in filters.items():
             condition = Attr(key).eq(value)
-
-            if filter_expr is None:
-                filter_expr = condition
-            else:
-                filter_expr = filter_expr & condition
-
+            filter_expr = condition if filter_expr is None else filter_expr & condition
         return filter_expr
 
-    def get_item(self, name, schema):
+    def scan_items(self, name, schema):
+        # Using Scan with filter — for multi-field queries without index
         table = self.dynamodb.Table(name)
         expression = self.build_filter_expression(schema)
         response = table.scan(FilterExpression=expression)
@@ -134,11 +127,34 @@ class dynamoDB:
         
         return response.get("Items", [])
 
-    def query_items(self, name, key_name, key_value):
-        table = self.dynamodb.Table(name)
 
+    def query_items(self, name, key_name, key_value):
+        # Using Query on partition key — faster than Scan
+        table = self.dynamodb.Table(name)
         response = table.query(
             KeyConditionExpression=Key(key_name).eq(key_value)
         )
-
         return response.get("Items", [])
+
+    def query_lsi(self, name, index_name, partition_value, sort_value):
+        # Querying Local Secondary Index with partition + sort key
+        table = self.dynamodb.Table(name)
+        response = table.query(
+            IndexName=index_name,
+            KeyConditionExpression=Key("artist").eq(partition_value) & Key("year").eq(sort_value)
+        )
+        return response.get("Items", [])
+
+    def query_gsi(self, name, index_name, partition_value):
+        # Querying Global Secondary Index by year partition key
+        table = self.dynamodb.Table(name)
+        response = table.query(
+            IndexName=index_name,
+            KeyConditionExpression=Key("year").eq(partition_value)
+        )
+        return response.get("Items", [])
+
+    def delete_item(self, name, key):
+        # Deleting a single item by its primary key
+        table = self.dynamodb.Table(name)
+        table.delete_item(Key=key)
