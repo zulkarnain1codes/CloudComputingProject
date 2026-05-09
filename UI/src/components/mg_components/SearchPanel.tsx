@@ -47,11 +47,7 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ onSubscribe }) => {
       }
       setNoResults(false);
 
-      const combined = data.details.map((item: any, index: number) => ({
-        ...item,
-        image_url: data.jpg[index],
-      }));
-
+      const combined = data.details
       setSongs(combined);
 
     } catch (err) {

@@ -97,7 +97,7 @@ class dynamoDB:
     # Exact match — most efficient, O(1)
         table = self.dynamodb.Table(name)
         response = table.get_item(
-            Key={"artist": artist, "title#year": title_year}
+            Key={"artist": artist, "title_year": title_year}
         )
         item = response.get("Item")
         return [item] if item else []

@@ -53,14 +53,15 @@ def get_music(schema):
     keys = []
     for item in items:
         artist = item["artist"].replace(" ", "_")
-        title  = item["title"].replace(" ", "_")
-        key    = f"music/{artist}_{title}.jpg"
+        title_year  = item["title_year"].replace(" ", "_")
+        key    = f"music/{artist}_{title_year}.jpg"
         keys.append(key)
 
     # Generating presigned URLs from S3 for secure image access
     urls = bucket.get_from_bucket(BUCKET, keys)
-
-    return {"jpg": urls, "details": items}
+    for item, url in zip(items, urls):
+        item["img_url"] = url
+    return {"details": items}
 
 def subscribe_music(data):
     user_email = data["user_email"]
@@ -78,7 +79,6 @@ def subscribe_music(data):
         "artist":     song["artist"],
         "album":      song.get("album", ""),
         "year":       song.get("year", ""),
-        "img_url": song.get("img_url", ""),
         "artist_title_year" : artist_title_year
     }
 
@@ -90,6 +90,18 @@ def get_subscriptions(data):
     user_email = data["user_email"]
     # Using Query on subscriptions table — user_email is partition key
     items = db.query_items("subscriptions", "user_email", user_email)
+    keys = []
+    for item in items:
+        artist = item["artist"].replace(" ", "_")
+        title  = item["title"].replace(" ", "_")
+        year   = item["year"].replace(" ", "_")
+        key    = f"music/{artist}_{title}#{year}.jpg"
+        keys.append(key)
+
+    # Generating presigned URLs from S3 for secure image access
+    urls = bucket.get_from_bucket(BUCKET, keys)
+    for item, url in zip(items, urls):
+        item["img_url"] = url
     return {"subscriptions": items}
 
 

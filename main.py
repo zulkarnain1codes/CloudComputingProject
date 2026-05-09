@@ -112,7 +112,7 @@ for item in items:
     try:
         img_data = requests.get(img_url).content
         key = f"music/{artist}_{title}.jpg"
-        bucket.upload_to_bucket("s4134986picturebucket",key,img_data)
+        bucket.upload_to_bucket("s4139282picturebucket",key,img_data)
 
     except Exception as e:
         print(f"Failed for {img_url}: {e}")
