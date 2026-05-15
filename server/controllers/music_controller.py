@@ -109,7 +109,7 @@ def remove_subscription(data):
     user_email = data["user_email"]
     artist_title_year = f"{data['artist']}#{data['title']}#{data['year']}"
 
-    # Deleting by primary key — user_email + title
+
     db.delete_item("subscriptions", {
         "user_email": user_email,
         "artist_title_year": artist_title_year

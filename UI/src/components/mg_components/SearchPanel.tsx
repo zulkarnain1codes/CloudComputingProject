@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, CardContent, TextField, Button, Typography } from "@mui/material";
+import { Card, CardContent, TextField, Button, Typography, Snackbar, Alert } from "@mui/material";
 import SongCard from "./SongCard";
 import { subscribeMusic } from "../../services/musicApi";
 import { getApiUrl } from '../../config/apiConfig';
@@ -15,27 +15,29 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ onSubscribe }) => {
   const [album, setAlbum] = useState("");
   const [songs, setSongs] = useState<any[]>([]);
   const [noResults, setNoResults] = useState(false);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: "success" | "error" | "warning" }>({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const handleSearch = async () => {
-    // Assignment requirement: at least one field must be filled
     if (!title && !artist && !year && !album) {
       alert("Please fill at least one field");
       return;
     }
 
-    const schema: any = {};
-    if (title) schema.title = title;
-    if (artist) schema.artist = artist;
-    if (year) schema.year = year;
-    if (album) schema.album = album;
+    const params = Object.entries({ title, artist, year, album })
+      .filter(([_, v]) => v)
+      .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
+      .join("&");
 
     try {
-      const response = await fetch(`${getApiUrl()}/music`, {
-        method: "POST",
+      const response = await fetch(`${getApiUrl()}/music?${params}`, {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(schema),
       });
 
       const data = await response.json();
@@ -46,9 +48,7 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ onSubscribe }) => {
         return;
       }
       setNoResults(false);
-
-      const combined = data.details
-      setSongs(combined);
+      setSongs(data.details);
 
     } catch (err) {
       alert("Error fetching data");
@@ -60,9 +60,14 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ onSubscribe }) => {
     if (!userData) return;
 
     const user = JSON.parse(userData);
+    const response = await subscribeMusic(user.email, song);
 
-    await subscribeMusic(user.email, song);
-    onSubscribe?.();  // triggers subscription list to refresh
+    if (response.message === "Already subscribed") {
+      setSnackbar({ open: true, message: "Already subscribed to this song!", severity: "warning" });
+    } else {
+      setSnackbar({ open: true, message: "Subscribed successfully!", severity: "success" });
+      onSubscribe?.();
+    }
   };
 
   return (
@@ -123,6 +128,22 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ onSubscribe }) => {
           />
         ))}
       </CardContent>
+
+      {/* Snackbar for subscribe feedback */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Card>
   );
 };

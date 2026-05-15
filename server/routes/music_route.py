@@ -1,21 +1,32 @@
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body,Query
 from server.controllers import music_controller
 
 router = APIRouter()
 
-
-@router.post("/music")
-def post_music(schema: dict = Body(...)):
+@router.get("/music")
+def get_music(
+    artist: str = Query(None),
+    title: str = Query(None),
+    year: str = Query(None),
+    album: str = Query(None)
+):
+    schema = {k: v for k, v in {
+        "artist": artist,
+        "title": title,
+        "year": year,
+        "album": album
+    }.items() if v is not None and v != "None"}
+    
     return music_controller.get_music(schema)
-
 
 @router.post("/music/subscribe")
 def subscribe(schema: dict = Body(...)):
     return music_controller.subscribe_music(schema)
 
 
-@router.post("/music/subscriptions")
-def get_subscriptions(schema: dict = Body(...)):
+@router.get("/music/subscriptions")
+def get_subscriptions(user_email: str = Query(...)):
+    schema = {"user_email": user_email}
     return music_controller.get_subscriptions(schema)
 
 
