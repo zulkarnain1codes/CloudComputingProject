@@ -8,11 +8,10 @@ import React, { useState } from "react";
 
 const MainPage: React.FC = () => {
   const navigate = useNavigate();
-  // Incrementing this triggers SubscriptionList to reload
   const [refreshSubs, setRefreshSubs] = useState(0);
 
   React.useEffect(() => {
-    const user = localStorage.getItem("user");
+    const user = sessionStorage.getItem("user"); 
     if (!user) navigate("/login");
   }, [navigate]);
 

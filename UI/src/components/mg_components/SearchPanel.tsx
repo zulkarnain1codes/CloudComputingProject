@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, CardContent, TextField, Button, Typography } from "@mui/material";
+import { Card, CardContent, TextField, Button, Typography, Snackbar, Alert } from "@mui/material";
 import SongCard from "./SongCard";
 import { subscribeMusic } from "../../api/api";
 import { getMusic } from "../../api/api";
@@ -15,9 +15,13 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ onSubscribe }) => {
   const [album, setAlbum] = useState("");
   const [songs, setSongs] = useState<any[]>([]);
   const [noResults, setNoResults] = useState(false);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: "success" | "error" | "warning" }>({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const handleSearch = async () => {
-    // Assignment requirement: at least one field must be filled
     if (!title && !artist && !year && !album) {
       alert("Please fill at least one field");
       return;
@@ -38,7 +42,6 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ onSubscribe }) => {
         return;
       }
       setNoResults(false);
-
       setSongs(data.details);
 
     } catch (err) {
@@ -47,13 +50,18 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ onSubscribe }) => {
   };
 
   const handleSubscribe = async (song: any) => {
-    const userData = localStorage.getItem("user");
+    const userData = sessionStorage.getItem("user"); // changed from localStorage
     if (!userData) return;
 
     const user = JSON.parse(userData);
+    const response = await subscribeMusic(user.email, song);
 
-    await subscribeMusic(user.email, song);
-    onSubscribe?.();  // triggers subscription list to refresh
+    if (response.message === "Already subscribed") {
+      setSnackbar({ open: true, message: "Already subscribed to this song!", severity: "warning" });
+    } else {
+      setSnackbar({ open: true, message: "Subscribed successfully!", severity: "success" });
+      onSubscribe?.();
+    }
   };
 
   return (
@@ -114,6 +122,22 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ onSubscribe }) => {
           />
         ))}
       </CardContent>
+
+      {/* Snackbar for subscribe feedback */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Card>
   );
 };

@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent, Typography, Avatar, Box } from "@mui/material";
 
 const UserCard: React.FC = () => {
-  const userData = localStorage.getItem("user");
+  const userData = sessionStorage.getItem("user"); 
   const user = userData ? JSON.parse(userData) : null;
 
   const username = user?.user_name || "Guest";

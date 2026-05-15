@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import {Box, Button, TextField, Typography} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
 
-    React.useEffect(() => { //Added fix for routing after login
-        const user = localStorage.getItem("user");
+    React.useEffect(() => {
+        const user = sessionStorage.getItem("user"); 
         if (user) {
             navigate("/main");
         }
@@ -38,7 +39,7 @@ const LoginPage: React.FC = () => {
                 return;
             }
 
-            localStorage.setItem("user", JSON.stringify(data.user));
+            sessionStorage.setItem("user", JSON.stringify(data.user)); // fixed
             navigate("/main");
         } catch (error) {
             console.error(error);
@@ -63,7 +64,6 @@ const LoginPage: React.FC = () => {
             <Typography variant="h4" sx={{ fontWeight: 700 }}>
                 Login
             </Typography>
-
 
             <TextField
                 label = "Email"
@@ -93,7 +93,7 @@ const LoginPage: React.FC = () => {
                 Register
             </Button>
         </Box>
-        );
-    };
+    );
+};
 
 export default LoginPage;
